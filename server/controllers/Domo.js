@@ -13,13 +13,14 @@ const makerPage = (req, res) => {
 };
 
 const makeDomo = (req, res) => {
-  if (!req.body.name || !req.body.age) {
-    return res.status(400).json({ error: 'RAWR! Both name and age are required!' });
+  if (!req.body.name || !req.body.age || !req.body.level) {
+    return res.status(400).json({ error: 'RAWR! Name, Age, and Level are all required!' });
   }
 
   const domoData = {
     name: req.body.name,
     age: req.body.age,
+    level: req.body.level,
     owner: req.session.account._id,
   };
 
@@ -41,6 +42,33 @@ const makeDomo = (req, res) => {
   return domoPromise;
 };
 
+const updateDomo = (req, res) => {
+  if (!req.body.name) {
+    return res.status(400).json({ error: 'RAWR! Name is required!' });
+  }
+
+  Domo.DomoModel.findByName(req.session.account._id, req.body.name, (err, doc) => {
+    if (err) { return res.status(500).json({ err }); }
+    if (!doc) { return res.json({ warning: 'Domo not found!' }); }
+    const tempDomo = doc;
+    console.log(tempDomo);
+    tempDomo.level++;
+
+    const domoPromise = tempDomo.save();
+
+    domoPromise.then(() => res.json({ redirect: '/maker' }));
+
+    domoPromise.catch((e) => {
+      console.log(e);
+      return res.status(400).json({ error: 'An error occured.' });
+    });
+
+    return domoPromise;
+  });
+
+  return false;
+};
+
 const getDomos = (request, response) => {
   const req = request;
   const res = response;
@@ -58,3 +86,4 @@ const getDomos = (request, response) => {
 module.exports.makerPage = makerPage;
 module.exports.getDomos = getDomos;
 module.exports.make = makeDomo;
+module.exports.update = updateDomo;
