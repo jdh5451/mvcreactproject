@@ -1,18 +1,18 @@
 {
-  "name": "Logins",
+  "name": "Checklist Tracker",
   "version": "1.0.0",
   "engines": {
     "node": "15.8.0",
     "npm": "7.5.1"
   },
-  "description": "A Simple Login Example using Node.js, Mongo and Redis",
+  "description": "A tracker for checklists",
   "main": "./server/app.js",
   "scripts": {
     "buildLoginBundle": "babel ./client/login ./client/helper --presets @babel/preset-react --out-file ./hosted/loginBundle.js",
     "buildAppBundle": "babel ./client/app ./client/helper --presets @babel/preset-react --out-file ./hosted/bundle.js",
-    "build":"npm run buildLoginBundle && npm run buildAppBundle",
-    "watchLoginBundle":"babel --watch ./client/login ./client/helper --presets @babel/preset-react --out-file ./hosted/loginBundle.js",
-    "watchAppBundle":"babel --watch ./client/app ./client/helper --presets @babel/preset-react --out-file ./hosted/bundle.js",
+    "build": "npm run buildLoginBundle && npm run buildAppBundle",
+    "watchLoginBundle": "babel --watch ./client/login ./client/helper --presets @babel/preset-react --out-file ./hosted/loginBundle.js",
+    "watchAppBundle": "babel --watch ./client/app ./client/helper --presets @babel/preset-react --out-file ./hosted/bundle.js",
     "nodemon": "nodemon --watch ./server ./server/app.js",
     "start": "node ./server/app.js",
     "pretest": "eslint ./server --fix",
@@ -24,7 +24,7 @@
     "Redis",
     "Login"
   ],
-  "author": "Cody Van De Mark",
+  "author": "Jeff Hernandez",
   "license": "Apache 2.0",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
