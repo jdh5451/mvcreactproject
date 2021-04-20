@@ -1,22 +1,33 @@
 const mongoose = require('mongoose');
 
+
 mongoose.Promise = global.Promise;
 const _ = require('underscore');
+const tasks=require('./Task.js');
 
 let ListModel = {};
 
 const convertId = mongoose.Types.ObjectId;
+const setTitle = (title) => _.escape(title).trim();
 
 const ListSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    
+    trim: true,
+    set: setTitle,
   },
 
-  entryNumber: {
+  desc:{
+      type:String,
+      default:"no description",
+      trim: true,
+      set:setTitle,
+  },  
+  
+  numberTasks: {
     type: Number,
-    min: 0,
+    min: 1,
     required: true,
   },
 
@@ -25,10 +36,7 @@ const ListSchema = new mongoose.Schema({
     default: false,
   },
 
-  entries:{
-      
-      
-  },
+  tasks:[tasks.TaskSchema],
     
   owner: {
     type: mongoose.Schema.ObjectId,
@@ -42,3 +50,29 @@ const ListSchema = new mongoose.Schema({
   },
 
 });
+
+ListSchema.statics.toAPI=(doc)=>({
+    title:doc.title,
+});
+
+ListSchema.statics.findByOwner=(ownerId,callback)=>{
+  const search = {
+    owner: convertId(ownerId),
+  };
+
+  return ListModel.find(search).select('title').lean().exec(callback);
+};
+
+ListSchema.statics.findByName = (ownerId, name, callback) => {
+  const search = {
+    owner: convertId(ownerId),
+    name,
+  };
+
+  return ListModel.findOne(search, callback);
+};
+
+ListModel=mongoose.model('List',ListSchema);
+
+module.exports.ListModel=ListModel;
+module.exports.ListSchema=ListSchema;
