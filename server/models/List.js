@@ -60,13 +60,13 @@ ListSchema.statics.findByOwner=(ownerId,callback)=>{
     owner: convertId(ownerId),
   };
 
-  return ListModel.find(search).select('title').lean().exec(callback);
+  return ListModel.find(search,callback);
 };
 
-ListSchema.statics.findByName = (ownerId, name, callback) => {
+ListSchema.statics.findByTitle = (ownerId, title, callback) => {
   const search = {
     owner: convertId(ownerId),
-    name,
+    title,
   };
 
   return ListModel.findOne(search, callback);
