@@ -1,154 +1,179 @@
 "use strict";
 
-var handleDomo = function handleDomo(e) {
+var handleList = function handleList(e) {
   e.preventDefault();
-  $("#domoMessage").animate({
-    width: 'hide'
-  }, 350);
-
-  if ($("#domoName").val() == '' || $("#domoAge").val() == '' || $("#domoLevel").val() == '') {
-    handleError("RAWR! All fields are required!");
-    return false;
-  }
-
-  sendAjax('POST', $("#domoForm").attr("action"), $("#domoForm").serialize(), function () {
-    loadDomosFromServer();
+  console.log($("#taskList").serializeArray());
+  console.log($("#createForm").serialize());
+  sendAjax('POST', '/app', $("#createForm").serialize(), function () {
+    loadTitlesFromServer();
   });
   return false;
 };
+/*const handleCreateMenu=(e)=>{
+    
+};
 
-var handleUpdate = function handleUpdate(e) {
+const handleEdit=(e)=>{
+    
+};*/
+
+
+var handleExpand = function handleExpand(e) {
   e.preventDefault();
-  $("#domoMessage").animate({
-    width: 'hide'
-  }, 350);
-
-  if ($("#updateName").val() == '') {
-    handleError("RAWR! Name is required!");
-    return false;
-  }
-
-  sendAjax('POST', $("#updateForm").attr("action"), $("#updateForm").serialize(), function () {
-    loadDomosFromServer();
-  });
+  e.target.innerHTML = "-";
+  e.onClick = handleShrink(e);
+  document.querySelector("#".concat(e.target.id)).style.display = "initial";
   return false;
 };
 
-var DomoForm = function DomoForm(props) {
-  return /*#__PURE__*/React.createElement("form", {
-    id: "domoForm",
-    name: "domoForm",
-    onSubmit: handleDomo,
-    action: "/maker",
-    method: "POST",
-    className: "domoForm"
-  }, /*#__PURE__*/React.createElement("label", {
-    htmlFor: "name"
-  }, "Name: "), /*#__PURE__*/React.createElement("input", {
-    id: "domoName",
-    type: "text",
-    name: "name",
-    placeholder: "Domo Name"
-  }), /*#__PURE__*/React.createElement("label", {
-    htmlFor: "age"
-  }, "Age: "), /*#__PURE__*/React.createElement("input", {
-    id: "domoAge",
-    type: "text",
-    name: "age",
-    placeholder: "Domo Age"
-  }), /*#__PURE__*/React.createElement("label", {
-    htmlFor: "level"
-  }, "Level: "), /*#__PURE__*/React.createElement("input", {
-    id: "domoLevel",
-    type: "text",
-    name: "level",
-    placeholder: "Domo Level"
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "hidden",
-    name: "_csrf",
-    value: props.csrf
-  }), /*#__PURE__*/React.createElement("input", {
-    className: "makeDomoSubmit",
-    type: "submit",
-    value: "Make Domo"
-  }));
+var handleShrink = function handleShrink(e) {
+  e.preventDefault();
+  e.target.innerHTML = "+";
+  e.onClick = handleExpand(e);
+  document.querySelector("#".concat(e.target.id)).style.display = "none";
+  return false;
 };
+/*const handleAdd=(e)=>{
+    
+};*/
+///find some way to pass a csrf token in through this
 
-var UpdateForm = function UpdateForm(props) {
-  return /*#__PURE__*/React.createElement("form", {
-    id: "updateForm",
-    name: "updateForm",
-    onSubmit: handleUpdate,
-    action: "/update",
-    method: "POST",
-    className: "updateForm"
-  }, /*#__PURE__*/React.createElement("label", {
-    htmlFor: "name"
-  }, "Name: "), /*#__PURE__*/React.createElement("input", {
-    id: "updateName",
-    type: "text",
-    name: "name",
-    placeholder: "Domo Name"
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "hidden",
-    name: "_csrf",
-    value: props.csrf
-  }), /*#__PURE__*/React.createElement("input", {
-    className: "updateDomoSubmit",
-    type: "submit",
-    value: "Level Domo Up!"
-  }));
-};
 
-var DomoList = function DomoList(props) {
-  if (props.domos.length === 0) {
+var ListView = function ListView(props) {
+  if (props.lists.length === 0) {
     return /*#__PURE__*/React.createElement("div", {
-      className: "domoList"
+      id: "displayList"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "noLists"
     }, /*#__PURE__*/React.createElement("h3", {
-      className: "emptyDomo"
-    }, "No Domos Yet"));
+      className: "noChecklists"
+    }, "You haven't made any checklists. Make one now?")));
   }
 
-  var domoNodes = props.domos.map(function (domo) {
+  var listNodes = props.lists.map(function (list) {
     return /*#__PURE__*/React.createElement("div", {
-      key: domo._id,
-      className: "domo"
-    }, /*#__PURE__*/React.createElement("img", {
-      src: "/assets/img/domoface.jpeg",
-      alt: "domo face",
-      className: "domoFace"
-    }), /*#__PURE__*/React.createElement("h3", {
-      className: "domoName"
-    }, " Name: ", domo.name, " "), /*#__PURE__*/React.createElement("h3", {
-      className: "domoAge"
-    }, " Age: ", domo.age, " "), /*#__PURE__*/React.createElement("h3", {
-      className: "domoLevel"
-    }, " Level: ", domo.level, " "));
+      key: list._id,
+      className: "checklist"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "header"
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: "listTitle"
+    }, list.title)), /*#__PURE__*/React.createElement("div", {
+      className: "listContent",
+      id: list.title
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: "listDesc"
+    }, list.desc), /*#__PURE__*/React.createElement("ul", null, list.tasks.map(function (task) {
+      var handleUpdate = function handleUpdate(e) {
+        var data = "title=".concat(task.title, "&id=").concat(task._id, "&completed=").concat(e.target.checked);
+        console.log(data);
+        sendAjax('POST', '/update', data, function () {
+          loadTitlesFromServer();
+        });
+        return false;
+      };
+
+      console.log(task.completed);
+
+      if (task.completed) {
+        return /*#__PURE__*/React.createElement("li", {
+          key: task._id
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "task"
+        }, task.content), /*#__PURE__*/React.createElement("input", {
+          type: "checkbox",
+          name: "task",
+          onChange: handleUpdate,
+          checked: true,
+          title: task.title,
+          taskid: task._id
+        }));
+      } else {
+        return /*#__PURE__*/React.createElement("li", {
+          key: task._id
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "task"
+        }, task.content), /*#__PURE__*/React.createElement("input", {
+          type: "checkbox",
+          name: "task",
+          onChange: handleUpdate,
+          title: task.title,
+          taskid: task._id
+        }));
+      }
+    }))));
   });
   return /*#__PURE__*/React.createElement("div", {
-    className: "domoList"
-  }, domoNodes);
+    id: "displayList"
+  }, listNodes);
 };
 
-var loadDomosFromServer = function loadDomosFromServer() {
-  sendAjax('GET', '/getDomos', null, function (data) {
-    ReactDOM.render( /*#__PURE__*/React.createElement(DomoList, {
-      domos: data.domos
-    }), document.querySelector("#domos"));
+var MakeForm = function MakeForm(props) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "makeForm"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "makePrompt"
+  }, "Create List"), /*#__PURE__*/React.createElement("form", {
+    id: "createForm",
+    name: "createForm",
+    onSubmit: handleList,
+    method: "POST",
+    className: "createForm"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "title"
+  }, "Title: "), /*#__PURE__*/React.createElement("input", {
+    id: "titleField",
+    type: "text",
+    name: "title",
+    placeholder: "New Checklist"
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "desc"
+  }, "Description: "), /*#__PURE__*/React.createElement("input", {
+    id: "descField",
+    type: "text",
+    name: "desc",
+    placeholder: "No description."
+  }), /*#__PURE__*/React.createElement("ul", {
+    id: "taskList"
+  }, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    name: "content1",
+    placeholder: "Write your task here..."
+  })), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    name: "content2",
+    placeholder: "Write your task here..."
+  })), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    name: "content3",
+    placeholder: "Write your task here..."
+  }))), /*#__PURE__*/React.createElement("input", {
+    type: "hidden",
+    name: "_csrf",
+    value: props.csrf
+  }), /*#__PURE__*/React.createElement("input", {
+    className: "submitList",
+    type: "submit",
+    value: "Create Checklist"
+  })));
+};
+
+var loadTitlesFromServer = function loadTitlesFromServer() {
+  sendAjax('GET', '/getTitles', null, function (data) {
+    ReactDOM.render( /*#__PURE__*/React.createElement(ListView, {
+      lists: data.lists
+    }), document.querySelector("#lists"));
   });
 };
 
 var setup = function setup(csrf) {
-  ReactDOM.render( /*#__PURE__*/React.createElement(DomoForm, {
+  ReactDOM.render( /*#__PURE__*/React.createElement(ListView, {
+    lists: []
+  }), document.querySelector("#lists"));
+  ReactDOM.render( /*#__PURE__*/React.createElement(MakeForm, {
     csrf: csrf
-  }), document.querySelector("#makeDomo"));
-  ReactDOM.render( /*#__PURE__*/React.createElement(UpdateForm, {
-    csrf: csrf
-  }), document.querySelector("#updateDomo"));
-  ReactDOM.render( /*#__PURE__*/React.createElement(DomoList, {
-    domos: []
-  }), document.querySelector("#domos"));
-  loadDomosFromServer();
+  }), document.querySelector("#make"));
+  loadTitlesFromServer();
 };
 
 var getToken = function getToken() {
@@ -164,15 +189,9 @@ $(document).ready(function () {
 
 var handleError = function handleError(message) {
   $("#errorMessage").text(message);
-  $("#domoMessage").animate({
-    width: 'toggle'
-  }, 350);
 };
 
 var redirect = function redirect(response) {
-  $("#domoMessage").animate({
-    width: 'hide'
-  }, 350);
   window.location = response.redirect;
 };
 

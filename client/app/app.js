@@ -1,18 +1,20 @@
 const handleList=(e)=>{
-    
+    e.preventDefault();
+    console.log($("#taskList").serializeArray());
+    console.log($("#createForm").serialize());
+    sendAjax('POST', '/app',$("#createForm").serialize(), function(){
+        loadTitlesFromServer();
+    });
+    return false;
 };
 
-const handleCreateMenu=(e)=>{
+/*const handleCreateMenu=(e)=>{
     
-};
-
-const handleUpdate=(title, id, e)=>{
-    let data=`title=${title}&id=${id}&completed=${e.target.checked}`;
 };
 
 const handleEdit=(e)=>{
     
-};
+};*/
 
 const handleExpand=(e)=>{
     e.preventDefault();
@@ -30,12 +32,14 @@ const handleShrink=(e)=>{
     e.target.innerHTML="+";
     e.onClick=handleExpand(e);
     document.querySelector(`#${e.target.id}`).style.display="none";
+    return false;
 };
 
-const handleAdd=(e)=>{
+/*const handleAdd=(e)=>{
     
-};
+};*/
 
+///find some way to pass a csrf token in through this
 const ListView=(props)=>{
     
     if(props.lists.length===0){
@@ -45,10 +49,7 @@ const ListView=(props)=>{
                <h3 className="noChecklists">You haven't made any checklists. Make one now?</h3>
             
         </div>
-        <div id="make">
-                <h3 className="makePrompt">Create List</h3>
-                <button type="button">+</button>
-        </div>
+       
         </div>
        
         );
@@ -59,25 +60,49 @@ const ListView=(props)=>{
             <div key={list._id} className="checklist">
                 <div className="header">
                     <h3 className="listTitle">{list.title}</h3>
-                    <button type="button" value={list.title} onClick={handleExpand}>
-                        +
-                    </button>
                 </div>
-                <div className="listContent" id={list.title} style="display:none">
+                <div className="listContent" id={list.title}>
                     <h3 className="listDesc">{list.desc}</h3>
                     <ul>
-                        {list.tasks.map(task=>(
+                        {list.tasks.map((task)=>{
+                            const handleUpdate=(e)=>{
+                                let data=`title=${task.title}&id=${task._id}&completed=${e.target.checked}`;
+                                console.log(data);
+                                sendAjax('POST', '/update',data, function(){
+                                    loadTitlesFromServer();
+                                });
+                                return false
+                            };
+                            
+                            
+                            console.log(task.completed);
+                            if(task.completed){
+                                return(
                             <li key={task._id}>
                                 <label htmlFor="task">{task.content}</label>
                                 <input 
                                     type="checkbox" 
                                     name="task" 
                                     onChange={handleUpdate}
-                                    taskId={task._id}
-                                    title={list.title}
+                                    checked
+                                    title={task.title}
+                                    taskid={task._id}
                                 />
-                            </li>
-                        ))}
+                            </li>);
+                            } else {
+                                return(
+                            <li key={task._id}>
+                                <label htmlFor="task">{task.content}</label>
+                                <input 
+                                    type="checkbox" 
+                                    name="task" 
+                                    onChange={handleUpdate}
+                                    title={task.title}
+                                    taskid={task._id}
+                                /> 
+                            </li>);
+                            }
+                        })}
                     </ul>
                 </div>
             </div>
@@ -87,33 +112,24 @@ const ListView=(props)=>{
     return(
         <div id="displayList">
         {listNodes}
-        
-        <div id="make">
-            <div className="header">
+        </div>
+    );
+};
+
+
+
+
+const MakeForm=(props)=>{
+    
+    return(
+        <div className="makeForm">
                 <h3 className="makePrompt">Create List</h3>
-                <button type="button" onClick={handleCreateMenu}>+</button>
-            </div>
-            <div className="createMenu" id="createMenu" style="display:none">
-                {MakeForm}
-            </div>
-        </div>
-        </div>
-    );
-};
-
-
-const EditForm=(props)=>{
-    return(
+                
+            
         
-    );
-};
-
-const MakeForm=()=>{
-    return(
-        <form
+            <form
             id="createForm"
             name="createForm"
-            numberTasks=3
             onSubmit={handleList}
             method="POST"
             className="createForm"
@@ -134,9 +150,11 @@ const MakeForm=()=>{
                     <input type="text" name="content3" placeholder="Write your task here..."/>
                 </li>
             </ul>
-            
+            <input type="hidden" name="_csrf" value={props.csrf} />
             <input className="submitList" type="submit" value="Create Checklist"/>
         </form>
+        </div>
+        
     );
 };
 
@@ -150,13 +168,21 @@ const loadTitlesFromServer=()=>{
 
 
 const setup=function(csrf){
-    
+    ReactDOM.render(
+        <ListView lists={[]} />,document.querySelector("#lists")
+    );
+    ReactDOM.render(
+        <MakeForm csrf={csrf} />, document.querySelector("#make")
+    );
+    loadTitlesFromServer();
 };
 
 const getToken=()=>{
   sendAjax('GET', '/getToken', null, (result)=>{
       setup(result.csrfToken);
   }); 
+
+    
 };
 
 $(document).ready(function(){

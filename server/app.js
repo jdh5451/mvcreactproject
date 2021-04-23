@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const compression = require('compression');
-const favicon = require('serve-favicon');
+// const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -50,7 +50,7 @@ const router = require('./router.js');
 
 const app = express();
 app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
-app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
+// app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.disable('x-powered-by');
 app.use(compression());
 app.use(bodyParser.urlencoded({
@@ -77,6 +77,7 @@ app.use((err, req, res, next) => {
   if (err.code !== 'EBADCSRFTOKEN') return next(err);
 
   console.log('Missing CSRF token');
+  console.log(req.body);
   return false;
 });
 
