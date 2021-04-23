@@ -40,6 +40,7 @@ const handleShrink=(e)=>{
 };*/
 
 ///find some way to pass a csrf token in through this
+///otherwise nothing updates properly
 const ListView=(props)=>{
     
     if(props.lists.length===0){
