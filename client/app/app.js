@@ -8,30 +8,30 @@ const handleList=(e)=>{
     return false;
 };
 
-/*const handleCreateMenu=(e)=>{
-    
-};
-
+/*
 const handleEdit=(e)=>{
     
 };*/
 
+const handleClick=(e)=>{
+    if(e.target.innerHTML==="-") handleShrink(e);
+    else handleExpand(e);
+}
+
 const handleExpand=(e)=>{
     e.preventDefault();
-    
+    console.log("handling expand");
     e.target.innerHTML="-";
-    e.onClick=handleShrink(e);
-    document.querySelector(`#${e.target.id}`).style.display="initial";
+    document.querySelector(`#${e.target.title}`).style.display="initial";
     
     return false;
 };
 
 const handleShrink=(e)=>{
     e.preventDefault();
-    
+    console.log("handling shrink");
     e.target.innerHTML="+";
-    e.onClick=handleExpand(e);
-    document.querySelector(`#${e.target.id}`).style.display="none";
+    document.querySelector(`#${e.target.title}`).style.display="none";
     return false;
 };
 
@@ -42,17 +42,13 @@ const handleShrink=(e)=>{
 ///find some way to pass a csrf token in through this
 ///otherwise nothing updates properly
 const ListView=(props)=>{
-    
     if(props.lists.length===0){
         return( 
         <div id="displayList">
            <div className="noLists">
                <h3 className="noChecklists">You haven't made any checklists. Make one now?</h3>
-            
         </div>
-       
         </div>
-       
         );
     }
     
@@ -61,22 +57,25 @@ const ListView=(props)=>{
             <div key={list._id} className="checklist">
                 <div className="header">
                     <h3 className="listTitle">{list.title}</h3>
+                    <button title={list.title} onClick={handleClick}>+</button>
                 </div>
-                <div className="listContent" id={list.title}>
+                <div className="listContent" id={list.title} style={{display:'none'}}>
                     <h3 className="listDesc">{list.desc}</h3>
                     <ul>
                         {list.tasks.map((task)=>{
                             const handleUpdate=(e)=>{
+                                
                                 let data=`title=${task.title}&id=${task._id}&completed=${e.target.checked}`;
+                                
                                 console.log(data);
                                 sendAjax('POST', '/update',data, function(){
                                     loadTitlesFromServer();
                                 });
                                 return false
                             };
-                            
-                            
+                           
                             console.log(task.completed);
+                            
                             if(task.completed){
                                 return(
                             <li key={task._id}>
@@ -88,6 +87,7 @@ const ListView=(props)=>{
                                     checked
                                     title={task.title}
                                     taskid={task._id}
+                                    
                                 />
                             </li>);
                             } else {
@@ -100,6 +100,7 @@ const ListView=(props)=>{
                                     onChange={handleUpdate}
                                     title={task.title}
                                     taskid={task._id}
+                                    
                                 /> 
                             </li>);
                             }
@@ -109,10 +110,10 @@ const ListView=(props)=>{
             </div>
         );
     });
-    
     return(
         <div id="displayList">
-        {listNodes}
+       
+        {listNodes}  
         </div>
     );
 };
@@ -125,15 +126,17 @@ const MakeForm=(props)=>{
     return(
         <div className="makeForm">
                 <h3 className="makePrompt">Create List</h3>
-                
+               <button title={"create"} onClick={handleClick}>+</button>
             
         
-            <form
+            <div id={"create"} style={{display:'none'}}>
+                <form
             id="createForm"
             name="createForm"
             onSubmit={handleList}
             method="POST"
             className="createForm"
+            
             >
             
             <label htmlFor="title">Title: </label>
@@ -154,6 +157,7 @@ const MakeForm=(props)=>{
             <input type="hidden" name="_csrf" value={props.csrf} />
             <input className="submitList" type="submit" value="Create Checklist"/>
         </form>
+            </div>
         </div>
         
     );
@@ -170,7 +174,7 @@ const loadTitlesFromServer=()=>{
 
 const setup=function(csrf){
     ReactDOM.render(
-        <ListView lists={[]} />,document.querySelector("#lists")
+        <ListView lists={[]} csrf={csrf}/>,document.querySelector("#lists")
     );
     ReactDOM.render(
         <MakeForm csrf={csrf} />, document.querySelector("#make")

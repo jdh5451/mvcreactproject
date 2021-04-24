@@ -9,34 +9,36 @@ var handleList = function handleList(e) {
   });
   return false;
 };
-/*const handleCreateMenu=(e)=>{
-    
-};
-
+/*
 const handleEdit=(e)=>{
     
 };*/
 
 
+var handleClick = function handleClick(e) {
+  if (e.target.innerHTML === "-") handleShrink(e);else handleExpand(e);
+};
+
 var handleExpand = function handleExpand(e) {
   e.preventDefault();
+  console.log("handling expand");
   e.target.innerHTML = "-";
-  e.onClick = handleShrink(e);
-  document.querySelector("#".concat(e.target.id)).style.display = "initial";
+  document.querySelector("#".concat(e.target.title)).style.display = "initial";
   return false;
 };
 
 var handleShrink = function handleShrink(e) {
   e.preventDefault();
+  console.log("handling shrink");
   e.target.innerHTML = "+";
-  e.onClick = handleExpand(e);
-  document.querySelector("#".concat(e.target.id)).style.display = "none";
+  document.querySelector("#".concat(e.target.title)).style.display = "none";
   return false;
 };
 /*const handleAdd=(e)=>{
     
 };*/
 ///find some way to pass a csrf token in through this
+///otherwise nothing updates properly
 
 
 var ListView = function ListView(props) {
@@ -58,9 +60,15 @@ var ListView = function ListView(props) {
       className: "header"
     }, /*#__PURE__*/React.createElement("h3", {
       className: "listTitle"
-    }, list.title)), /*#__PURE__*/React.createElement("div", {
+    }, list.title), /*#__PURE__*/React.createElement("button", {
+      title: list.title,
+      onClick: handleClick
+    }, "+")), /*#__PURE__*/React.createElement("div", {
       className: "listContent",
-      id: list.title
+      id: list.title,
+      style: {
+        display: 'none'
+      }
     }, /*#__PURE__*/React.createElement("h3", {
       className: "listDesc"
     }, list.desc), /*#__PURE__*/React.createElement("ul", null, list.tasks.map(function (task) {
@@ -113,7 +121,15 @@ var MakeForm = function MakeForm(props) {
     className: "makeForm"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "makePrompt"
-  }, "Create List"), /*#__PURE__*/React.createElement("form", {
+  }, "Create List"), /*#__PURE__*/React.createElement("button", {
+    title: "create",
+    onClick: handleClick
+  }, "+"), /*#__PURE__*/React.createElement("div", {
+    id: "create",
+    style: {
+      display: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("form", {
     id: "createForm",
     name: "createForm",
     onSubmit: handleList,
@@ -155,7 +171,7 @@ var MakeForm = function MakeForm(props) {
     className: "submitList",
     type: "submit",
     value: "Create Checklist"
-  })));
+  }))));
 };
 
 var loadTitlesFromServer = function loadTitlesFromServer() {
@@ -168,7 +184,8 @@ var loadTitlesFromServer = function loadTitlesFromServer() {
 
 var setup = function setup(csrf) {
   ReactDOM.render( /*#__PURE__*/React.createElement(ListView, {
-    lists: []
+    lists: [],
+    csrf: csrf
   }), document.querySelector("#lists"));
   ReactDOM.render( /*#__PURE__*/React.createElement(MakeForm, {
     csrf: csrf
