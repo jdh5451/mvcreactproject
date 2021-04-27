@@ -1,10 +1,28 @@
 "use strict";
 
+var csrfToken;
+
 var handleList = function handleList(e) {
-  e.preventDefault();
-  console.log($("#taskList").serializeArray());
-  console.log($("#createForm").serialize());
-  sendAjax('POST', '/app', $("#createForm").serialize(), function () {
+  e.preventDefault(); //console.log(document.getElementById("taskList").childNodes);
+  //console.log($("#createForm").serialize());
+
+  var listObject = {
+    title: document.getElementById("titleField").value,
+    desc: document.getElementById("descField").value,
+    _csrf: csrfToken,
+    tasks: []
+  };
+  var tasks = document.getElementById("taskList").childNodes;
+
+  for (var i = 0; i < tasks.length; i++) {
+    listObject.tasks[i] = {
+      title: listObject.title,
+      content: tasks[i].firstElementChild.value
+    };
+  }
+
+  console.log(JSON.stringify(listObject));
+  sendAjaxJSON('POST', '/app', csrfToken, JSON.stringify(listObject), function () {
     loadTitlesFromServer();
   });
   return false;
@@ -37,8 +55,6 @@ var handleShrink = function handleShrink(e) {
 /*const handleAdd=(e)=>{
     
 };*/
-///find some way to pass a csrf token in through this
-///otherwise nothing updates properly
 
 
 var ListView = function ListView(props) {
@@ -73,7 +89,7 @@ var ListView = function ListView(props) {
       className: "listDesc"
     }, list.desc), /*#__PURE__*/React.createElement("ul", null, list.tasks.map(function (task) {
       var handleUpdate = function handleUpdate(e) {
-        var data = "title=".concat(task.title, "&id=").concat(task._id, "&completed=").concat(e.target.checked);
+        var data = "_csrf=".concat(csrfToken, "&title=").concat(task.title, "&id=").concat(task._id, "&completed=").concat(e.target.checked);
         console.log(data);
         sendAjax('POST', '/update', data, function () {
           loadTitlesFromServer();
@@ -117,6 +133,19 @@ var ListView = function ListView(props) {
 };
 
 var MakeForm = function MakeForm(props) {
+  /*const handleAdd=(e)=>{
+      let tasks=document.getElementById("taskList").childNodes;
+      if(tasks.length>3) {
+          console.log('cannot add more tasks');
+      } else {
+          ReactDOM.render(
+              <li>
+                   <input type="text" placeholder="Write your task here..."/>
+              </li>,
+              document.querySelector("#taskList")
+          );
+      }
+  };*/
   return /*#__PURE__*/React.createElement("div", {
     className: "makeForm"
   }, /*#__PURE__*/React.createElement("h3", {
@@ -153,15 +182,6 @@ var MakeForm = function MakeForm(props) {
     id: "taskList"
   }, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
     type: "text",
-    name: "content1",
-    placeholder: "Write your task here..."
-  })), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    name: "content2",
-    placeholder: "Write your task here..."
-  })), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    name: "content3",
     placeholder: "Write your task here..."
   }))), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
@@ -182,20 +202,21 @@ var loadTitlesFromServer = function loadTitlesFromServer() {
   });
 };
 
-var setup = function setup(csrf) {
+var setup = function setup() {
   ReactDOM.render( /*#__PURE__*/React.createElement(ListView, {
     lists: [],
-    csrf: csrf
+    csrf: csrfToken
   }), document.querySelector("#lists"));
   ReactDOM.render( /*#__PURE__*/React.createElement(MakeForm, {
-    csrf: csrf
+    csrf: csrfToken
   }), document.querySelector("#make"));
   loadTitlesFromServer();
 };
 
 var getToken = function getToken() {
   sendAjax('GET', '/getToken', null, function (result) {
-    setup(result.csrfToken);
+    csrfToken = result.csrfToken;
+    setup();
   });
 };
 
@@ -205,7 +226,7 @@ $(document).ready(function () {
 "use strict";
 
 var handleError = function handleError(message) {
-  $("#errorMessage").text(message);
+  console.log(message);
 };
 
 var redirect = function redirect(response) {
@@ -221,6 +242,22 @@ var sendAjax = function sendAjax(type, action, data, success) {
     dataType: "json",
     success: success,
     error: function error(xhr, status, _error) {
+      var messageObj = JSON.parse(xhr.responseText);
+      handleError(messageObj.error);
+    }
+  });
+};
+
+var sendAjaxJSON = function sendAjaxJSON(type, action, csrf, data, success) {
+  $.ajax({
+    cache: false,
+    type: type,
+    url: action,
+    header: "CSRF-TOKEN=".concat(csrf),
+    data: data,
+    dataType: "json",
+    success: success,
+    error: function error(xhr, status, _error2) {
       var messageObj = JSON.parse(xhr.responseText);
       handleError(messageObj.error);
     }

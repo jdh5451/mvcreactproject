@@ -17,7 +17,7 @@ const listPage = (req, res) => {
 // create a new list
 const makeList = (req, res) => {
   if (!req.body.title) {
-    return res.status(400).json({ error: 'Both title and number of tasks are required!' });
+    return res.status(400).json({ error: 'Title is required.' });
   }
 
   /* if(req.body.numberTasks<1){
@@ -26,7 +26,7 @@ const makeList = (req, res) => {
 
   const listData = {
     title: req.body.title,
-    numberTasks: 3,
+    numberTasks: req.body.tasks.length,
     tasks: [],
     owner: req.session.account._id,
   };
@@ -35,9 +35,12 @@ const makeList = (req, res) => {
     listData.desc = req.body.desc;
   }
 
-  listData.tasks.push(new Task.TaskModel({ title: listData.title, content: req.body.content1 }));
-  listData.tasks.push(new Task.TaskModel({ title: listData.title, content: req.body.content2 }));
-  listData.tasks.push(new Task.TaskModel({ title: listData.title, content: req.body.content3 }));
+  for (let i = 0; i < listData.numberTasks; i++) {
+    listData.tasks.push(new Task.TaskModel({
+      title: req.body.tasks[i].title,
+      content: req.body.tasks[i].content,
+    }));
+  }
 
   const newList = new List.ListModel(listData);
 

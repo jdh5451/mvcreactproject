@@ -1,8 +1,28 @@
+let csrfToken;
+
 const handleList=(e)=>{
     e.preventDefault();
-    console.log($("#taskList").serializeArray());
-    console.log($("#createForm").serialize());
-    sendAjax('POST', '/app',$("#createForm").serialize(), function(){
+    //console.log(document.getElementById("taskList").childNodes);
+    //console.log($("#createForm").serialize());
+    const listObject={
+        title:document.getElementById("titleField").value,
+        desc:document.getElementById("descField").value,
+        _csrf:csrfToken,
+        tasks:[],
+    };
+    
+    let tasks=document.getElementById("taskList").childNodes;
+    
+    for(let i=0;i<tasks.length;i++){
+        listObject.tasks[i]={
+          title:listObject.title,
+          content: tasks[i].firstElementChild.value,
+        };
+    }
+    
+    console.log(JSON.stringify(listObject));
+    
+    sendAjaxJSON('POST', '/app',csrfToken,JSON.stringify(listObject), function(){
         loadTitlesFromServer();
     });
     return false;
@@ -39,8 +59,6 @@ const handleShrink=(e)=>{
     
 };*/
 
-///find some way to pass a csrf token in through this
-///otherwise nothing updates properly
 const ListView=(props)=>{
     if(props.lists.length===0){
         return( 
@@ -65,7 +83,7 @@ const ListView=(props)=>{
                         {list.tasks.map((task)=>{
                             const handleUpdate=(e)=>{
                                 
-                                let data=`title=${task.title}&id=${task._id}&completed=${e.target.checked}`;
+                                let data=`_csrf=${csrfToken}&title=${task.title}&id=${task._id}&completed=${e.target.checked}`;
                                 
                                 console.log(data);
                                 sendAjax('POST', '/update',data, function(){
@@ -123,6 +141,20 @@ const ListView=(props)=>{
 
 const MakeForm=(props)=>{
     
+    /*const handleAdd=(e)=>{
+        let tasks=document.getElementById("taskList").childNodes;
+        if(tasks.length>3) {
+            console.log('cannot add more tasks');
+        } else {
+            ReactDOM.render(
+                <li>
+                     <input type="text" placeholder="Write your task here..."/>
+                </li>,
+                document.querySelector("#taskList")
+            );
+        }
+    };*/
+    
     return(
         <div className="makeForm">
                 <h3 className="makePrompt">Create List</h3>
@@ -143,17 +175,14 @@ const MakeForm=(props)=>{
             <input id="titleField" type="text" name="title" placeholder="New Checklist"/>
             <label htmlFor="desc">Description: </label>
             <input id="descField" type="text" name="desc" placeholder="No description."/>
+            
             <ul id="taskList">
                 <li>
-                    <input type="text" name="content1" placeholder="Write your task here..."/>
+                    <input type="text" placeholder="Write your task here..."/>
                 </li>
-                <li>
-                    <input type="text" name="content2" placeholder="Write your task here..."/>
-                </li>
-                <li>
-                    <input type="text" name="content3" placeholder="Write your task here..."/>
-                </li>
+                
             </ul>
+            
             <input type="hidden" name="_csrf" value={props.csrf} />
             <input className="submitList" type="submit" value="Create Checklist"/>
         </form>
@@ -172,19 +201,20 @@ const loadTitlesFromServer=()=>{
 };
 
 
-const setup=function(csrf){
+const setup=function(){
     ReactDOM.render(
-        <ListView lists={[]} csrf={csrf}/>,document.querySelector("#lists")
+        <ListView lists={[]} csrf={csrfToken}/>,document.querySelector("#lists")
     );
     ReactDOM.render(
-        <MakeForm csrf={csrf} />, document.querySelector("#make")
+        <MakeForm csrf={csrfToken} />, document.querySelector("#make")
     );
     loadTitlesFromServer();
 };
 
 const getToken=()=>{
   sendAjax('GET', '/getToken', null, (result)=>{
-      setup(result.csrfToken);
+      csrfToken=result.csrfToken;
+      setup();
   }); 
 
     

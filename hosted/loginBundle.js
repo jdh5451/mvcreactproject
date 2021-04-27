@@ -143,7 +143,7 @@ $(document).ready(function () {
 "use strict";
 
 var handleError = function handleError(message) {
-  $("#errorMessage").text(message);
+  console.log(message);
 };
 
 var redirect = function redirect(response) {
@@ -159,6 +159,22 @@ var sendAjax = function sendAjax(type, action, data, success) {
     dataType: "json",
     success: success,
     error: function error(xhr, status, _error) {
+      var messageObj = JSON.parse(xhr.responseText);
+      handleError(messageObj.error);
+    }
+  });
+};
+
+var sendAjaxJSON = function sendAjaxJSON(type, action, csrf, data, success) {
+  $.ajax({
+    cache: false,
+    type: type,
+    url: action,
+    header: "CSRF-TOKEN=".concat(csrf),
+    data: data,
+    dataType: "json",
+    success: success,
+    error: function error(xhr, status, _error2) {
       var messageObj = JSON.parse(xhr.responseText);
       handleError(messageObj.error);
     }
