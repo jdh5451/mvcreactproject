@@ -22,7 +22,7 @@ var handleList = function handleList(e) {
   }
 
   console.log(JSON.stringify(listObject));
-  sendAjaxJSON('POST', '/app', csrfToken, JSON.stringify(listObject), function () {
+  sendAjaxJSON('POST', '/app', csrfToken, listObject, function () {
     loadTitlesFromServer();
   });
   return false;
@@ -253,7 +253,9 @@ var sendAjaxJSON = function sendAjaxJSON(type, action, csrf, data, success) {
     cache: false,
     type: type,
     url: action,
-    header: "CSRF-TOKEN=".concat(csrf),
+    headers: {
+      'CSRF-TOKEN': csrf
+    },
     data: data,
     dataType: "json",
     success: success,

@@ -22,7 +22,7 @@ const handleList=(e)=>{
     
     console.log(JSON.stringify(listObject));
     
-    sendAjaxJSON('POST', '/app',csrfToken,JSON.stringify(listObject), function(){
+    sendAjaxJSON('POST', '/app',csrfToken,listObject, function(){
         loadTitlesFromServer();
     });
     return false;

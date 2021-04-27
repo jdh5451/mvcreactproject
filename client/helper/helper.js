@@ -26,7 +26,7 @@ const sendAjaxJSON=(type,action,csrf,data,success)=>{
         cache:false,
         type: type,
         url:action,
-        header: `CSRF-TOKEN=${csrf}`,
+        headers: {'CSRF-TOKEN':csrf},
         data: data,
         dataType: "json",
         success: success,
