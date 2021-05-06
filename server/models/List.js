@@ -74,7 +74,7 @@ ListSchema.statics.findByTitle = (ownerId, title, callback) => {
 ListSchema.statics.findById = (ownerId, id, callback) => {
   const search = {
     owner: convertId(ownerId),
-    _id:id,
+    _id: id,
   };
 
   return ListModel.findOne(search, callback);

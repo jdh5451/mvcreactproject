@@ -106,36 +106,36 @@ const editList = (req, res) => {
     return res.status(400).json({ error: 'An error occured.' });
   }
 
-  List.ListModel.findById(req.session.account._id,req.body.id, (err,doc)=>{
-    
-    doc.title=req.body.title;
-    if(req.body.desc){
-        doc.desc=req.body.desc;
+  List.ListModel.findById(req.session.account._id, req.body.id, (err, doc) => {
+    const tempList = doc;
+    tempList.title = req.body.title;
+    if (req.body.desc) {
+      tempList.desc = req.body.desc;
     }
 
-    let tasks = [];
-    
-    for(let i=0;i<req.body.tasks.length;i++){
+    const tasks = [];
+
+    for (let i = 0; i < req.body.tasks.length; i++) {
       tasks.push(new Task.TaskModel({
-            title: req.body.tasks[i].title,
-            content: req.body.tasks[i].content,
-            completed: req.body.tasks[i].completed,
-        }));
+        title: req.body.tasks[i].title,
+        content: req.body.tasks[i].content,
+        completed: req.body.tasks[i].completed,
+      }));
     }
-    
-    doc.tasks=tasks;
 
-    const listPromise=doc.save();
+    tempList.tasks = tasks;
 
-    listPromise.then(()=>res.json({redirect:'/app'}));
+    const listPromise = tempList.save();
 
-    listPromise.catch((err)=>{
-        console.log(err);
-        return res.status(400).json({error:'An error occured.'});
+    listPromise.then(() => res.json({ redirect: '/app' }));
+
+    listPromise.catch((e) => {
+      console.log(e);
+      return res.status(400).json({ error: 'An error occured.' });
     });
 
     return listPromise;
-    }); 
+  });
   return false;
 };
 
