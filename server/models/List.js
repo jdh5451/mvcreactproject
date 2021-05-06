@@ -71,6 +71,15 @@ ListSchema.statics.findByTitle = (ownerId, title, callback) => {
   return ListModel.findOne(search, callback);
 };
 
+ListSchema.statics.findById = (ownerId, id, callback) => {
+  const search = {
+    owner: convertId(ownerId),
+    _id:id,
+  };
+
+  return ListModel.findOne(search, callback);
+};
+
 ListModel = mongoose.model('List', ListSchema);
 
 module.exports.ListModel = ListModel;

@@ -1,4 +1,5 @@
 let csrfToken;
+let taskLimit=5;
 
 const handleList=(e)=>{
     e.preventDefault();
@@ -13,7 +14,13 @@ const handleList=(e)=>{
     
     let tasks=document.getElementById("taskList").childNodes;
     
+    if(tasks.length===0){
+        //error out
+        return false;
+    }
+    
     for(let i=0;i<tasks.length;i++){
+        
         listObject.tasks[i]={
           title:listObject.title,
           content: tasks[i].firstElementChild.value,
@@ -28,10 +35,11 @@ const handleList=(e)=>{
     return false;
 };
 
-/*
-const handleEdit=(e)=>{
-    
-};*/
+const handleToggleEdit=(e)=>{
+    if(e.target.innerHTML==="Edit") loadTitlesForEdit();
+    else loadTitlesFromServer();
+}
+
 
 const handleClick=(e)=>{
     if(e.target.innerHTML==="-") handleShrink(e);
@@ -130,30 +138,167 @@ const ListView=(props)=>{
     });
     return(
         <div id="displayList">
-       
+        <button type="button" onClick={handleToggleEdit}>Edit</button>
         {listNodes}  
         </div>
     );
 };
 
+const EditView=(props)=>{
+    if(props.lists.length===0){
+        return( 
+        <div id="displayEdit">
+           <div className="noLists">
+               <h3 className="noChecklists">There's nothing to edit! Make a new list now!</h3>
+        </div>
+        </div>
+        );
+    }
+    
+    const editNodes=props.lists.map(function(list){
+        
+        const handleEdit=(e)=>{
+            e.preventDefault();
+            //console.log(document.getElementById("taskList").childNodes);
+            //console.log($("#createForm").serialize());
+            const listObject={
+                id:list._id,
+                title:document.getElementById(`${list.title}TitleField`).value,
+                desc:document.getElementById(`${list.title}DescField`).value,
+                _csrf:csrfToken,
+                tasks:[],
+            };
+    
+            let tasks=document.getElementById(`edit${list.title}List`).childNodes;
+    
+            if(tasks.length===0){
+                //error out
+                return false;
+            }
+    
+            for(let i=0;i<tasks.length;i++){
+                console.log(tasks[i].lastElementChild.value);
+                listObject.tasks[i]={
+                title:listObject.title,
+                content: tasks[i].lastElementChild.value,
+                
+                };
+            }
+    
+            console.log(JSON.stringify(listObject));
+    
+            sendAjaxJSON('POST', '/edit',csrfToken,listObject, function(){
+                loadTitlesFromServer();
+            });
+            return false;
+        };
+        
+        
+        
+        return(
+            <div key={list._id} className="editForm">
+                <h3>Edit List</h3>
+                <button title={`edit${list.title}`} onClick={handleClick}>+</button>
+                
+                <div id={`edit${list.title}`} style={{display:'none'}}>
+                    <form
+                    id={`edit${list.title}Form`}
+                    name={`edit${list.title}Form`}
+                    onSubmit={handleEdit}
+                    method="POST"
+                    className="editForm" >
+                        <label htmlFor="title">Edit Title:</label>
+                        <input id={`${list.title}TitleField`} 
+                            type="text" 
+                            name="title" 
+                            defaultValue={list.title}/>
+                        <label htmlFor="desc">Edit Description:</label>
+                        <input id={`${list.title}DescField`} 
+                            type="text" 
+                            name="desc" 
+                            defaultValue={list.desc}/>
+                        <ul id={`edit${list.title}List`}>
+                        {list.tasks.map((task)=>{
+                            let input=React.createRef();
+                            const handleUpdateText=(e)=>{
+                                
+                            };
+                                return(
+                            <li key={task._id}>
+                                <label htmlFor="task">Edit Task:</label>
+                                <input 
+                                    ref={input}
+                                    type="text" 
+                                    name="task"
+                                    
+                                    value={task.content}
+                                    onChange={handleUpdateText}
 
-
+                                    
+                                />
+                                
+                                
+                            </li>);
+                        })}
+                    </ul>
+                    <button type="button" onClick={handleToggleEdit}>Cancel</button>
+                    <input className="submitEdit" type="submit" value="Edit Checklist" />
+                    </form>
+                </div>
+            </div>
+        );
+    });
+    return(
+        <div id="displayEdit">
+       
+        {editNodes}  
+        </div>
+    );
+};
 
 const MakeForm=(props)=>{
     
-    /*const handleAdd=(e)=>{
-        let tasks=document.getElementById("taskList").childNodes;
-        if(tasks.length>3) {
+    /*const handleAddSubtract=(e)=>{
+        if(e.target.id!=="addButton") handleSubtract(e);
+        else handleAdd(e);
+    }*/
+    
+    /*const handleSubtract=(e)=>{
+        console.log("handling subtract");
+        if(document.querySelector("#addButton").style.display==='none'){
+            document.querySelector("#addButton").style.display='initial';
+        }
+        e.target.parentNode.remove();
+    };*/
+    
+    const handleAdd=(e)=>{
+        console.log("handling add");
+        let tasks=Array.from(document.getElementById("taskList").childNodes);
+        console.log(tasks);
+        if(tasks.length>2) {
             console.log('cannot add more tasks');
         } else {
-            ReactDOM.render(
-                <li>
-                     <input type="text" placeholder="Write your task here..."/>
-                </li>,
-                document.querySelector("#taskList")
-            );
+            if(tasks.length+1>2){
+                document.querySelector("#addButton").style.display='none';
+            }
+            let taskInputs = tasks.map((task) => {
+                return (
+                    <li>
+                        <input type="text" placeholder="Write your task here..." 
+                            defaultValue={task.value !== 0 ? task.value : ""} />
+                        
+                    </li>
+                );
+            });
+            taskInputs.push( 
+            <li>
+                <input type="text" placeholder="Write your task here..." />
+                    
+            </li>);
+            
+            ReactDOM.render(taskInputs, document.getElementById("taskList"));
         }
-    };*/
+    };
     
     return(
         <div className="makeForm">
@@ -175,10 +320,11 @@ const MakeForm=(props)=>{
             <input id="titleField" type="text" name="title" placeholder="New Checklist"/>
             <label htmlFor="desc">Description: </label>
             <input id="descField" type="text" name="desc" placeholder="No description."/>
-            
+            <button id="addButton" type="button" onClick={handleAdd}>Add Task</button>
             <ul id="taskList">
                 <li>
                     <input type="text" placeholder="Write your task here..."/>
+                    
                 </li>
                 
             </ul>
@@ -200,6 +346,13 @@ const loadTitlesFromServer=()=>{
     });
 };
 
+const loadTitlesForEdit=()=>{
+    sendAjax('GET', '/getTitles', null, (data)=>{
+        ReactDOM.render(
+            <EditView lists={data.lists} />, document.querySelector("#lists")
+        );
+    });
+}
 
 const setup=function(){
     ReactDOM.render(

@@ -102,43 +102,39 @@ const updateList = (req, res) => {
 
 // edit a list
 const editList = (req, res) => {
-  if (!req.body.title) {
+  if (!req.body.id) {
     return res.status(400).json({ error: 'An error occured.' });
   }
 
-  /* List.ListModel.findByTitle(req.session.account._id,req.body.title, (err,doc)=>{
-        const listData={
-            title: req.body.title,
-            numberTasks:3,
-            tasks:[],
-            owner:req.session.account._id,
-        };
-
+  List.ListModel.findById(req.session.account._id,req.body.id, (err,doc)=>{
+    
+    doc.title=req.body.title;
     if(req.body.desc){
-        listData.desc=req.body.desc;
+        doc.desc=req.body.desc;
     }
 
-    listData.tasks.push(new Task.TaskModel({title:listData.title,content:req.body.content1}));
-    listData.tasks.push(new Task.TaskModel({title:listData.title,content:req.body.content2}));
-    listData.tasks.push(new Task.TaskModel({title:listData.title,content:req.body.content3}));
+    let tasks = [];
+    
+    for(let i=0;i<req.body.tasks.length;i++){
+      tasks.push(new Task.TaskModel({
+            title: req.body.tasks[i].title,
+            content: req.body.tasks[i].content,
+        }));
+    }
+    
+    doc.tasks=tasks;
 
-    const tempList=new List.ListModel(listData);
-
-    const listPromise=newList.save();
+    const listPromise=doc.save();
 
     listPromise.then(()=>res.json({redirect:'/app'}));
 
     listPromise.catch((err)=>{
         console.log(err);
-        if(err.code==11000){
-            return res.status(400).json({error:'List already exists.'});
-        }
-
         return res.status(400).json({error:'An error occured.'});
     });
 
     return listPromise;
-    }); */
+    }); 
   return false;
 };
 
