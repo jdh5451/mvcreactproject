@@ -102,7 +102,7 @@ const ListView=(props)=>{
                            
                             console.log(task.completed);
                             
-                            if(task.completed){
+                           
                                 return(
                             <li key={task._id}>
                                 <label htmlFor="task">{task.content}</label>
@@ -110,26 +110,13 @@ const ListView=(props)=>{
                                     type="checkbox" 
                                     name="task" 
                                     onChange={handleUpdate}
-                                    checked
+                                    defaultChecked={task.completed}
                                     title={task.title}
                                     taskid={task._id}
                                     
                                 />
                             </li>);
-                            } else {
-                                return(
-                            <li key={task._id}>
-                                <label htmlFor="task">{task.content}</label>
-                                <input 
-                                    type="checkbox" 
-                                    name="task" 
-                                    onChange={handleUpdate}
-                                    title={task.title}
-                                    taskid={task._id}
-                                    
-                                /> 
-                            </li>);
-                            }
+                            
                         })}
                     </ul>
                 </div>
@@ -177,11 +164,11 @@ const EditView=(props)=>{
             }
     
             for(let i=0;i<tasks.length;i++){
-                console.log(tasks[i].lastElementChild.value);
+                console.log(tasks[i].firstElementChild.value);
                 listObject.tasks[i]={
                 title:listObject.title,
-                content: tasks[i].lastElementChild.value,
-                
+                content: tasks[i].firstElementChild.value,
+                completed: tasks[i].lastElementChild.checked,
                 };
             }
     
@@ -225,18 +212,17 @@ const EditView=(props)=>{
                             };
                                 return(
                             <li key={task._id}>
-                                <label htmlFor="task">Edit Task:</label>
                                 <input 
-                                    ref={input}
                                     type="text" 
                                     name="task"
-                                    
-                                    value={task.content}
-                                    onChange={handleUpdateText}
-
-                                    
+                                    defaultValue={task.content}
                                 />
-                                
+                                <label htmlFor="taskDone">Completed?</label>
+                                <input 
+                                    type="checkbox" 
+                                    name="taskDone" 
+                                    defaultChecked={task.completed}
+                                /> 
                                 
                             </li>);
                         })}

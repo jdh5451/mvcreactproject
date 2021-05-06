@@ -103,33 +103,18 @@ var ListView = function ListView(props) {
       };
 
       console.log(task.completed);
-
-      if (task.completed) {
-        return /*#__PURE__*/React.createElement("li", {
-          key: task._id
-        }, /*#__PURE__*/React.createElement("label", {
-          htmlFor: "task"
-        }, task.content), /*#__PURE__*/React.createElement("input", {
-          type: "checkbox",
-          name: "task",
-          onChange: handleUpdate,
-          checked: true,
-          title: task.title,
-          taskid: task._id
-        }));
-      } else {
-        return /*#__PURE__*/React.createElement("li", {
-          key: task._id
-        }, /*#__PURE__*/React.createElement("label", {
-          htmlFor: "task"
-        }, task.content), /*#__PURE__*/React.createElement("input", {
-          type: "checkbox",
-          name: "task",
-          onChange: handleUpdate,
-          title: task.title,
-          taskid: task._id
-        }));
-      }
+      return /*#__PURE__*/React.createElement("li", {
+        key: task._id
+      }, /*#__PURE__*/React.createElement("label", {
+        htmlFor: "task"
+      }, task.content), /*#__PURE__*/React.createElement("input", {
+        type: "checkbox",
+        name: "task",
+        onChange: handleUpdate,
+        defaultChecked: task.completed,
+        title: task.title,
+        taskid: task._id
+      }));
     }))));
   });
   return /*#__PURE__*/React.createElement("div", {
@@ -171,10 +156,11 @@ var EditView = function EditView(props) {
       }
 
       for (var i = 0; i < tasks.length; i++) {
-        console.log(tasks[i].lastElementChild.value);
+        console.log(tasks[i].firstElementChild.value);
         listObject.tasks[i] = {
           title: listObject.title,
-          content: tasks[i].lastElementChild.value
+          content: tasks[i].firstElementChild.value,
+          completed: tasks[i].lastElementChild.checked
         };
       }
 
@@ -225,14 +211,16 @@ var EditView = function EditView(props) {
 
       return /*#__PURE__*/React.createElement("li", {
         key: task._id
-      }, /*#__PURE__*/React.createElement("label", {
-        htmlFor: "task"
-      }, "Edit Task:"), /*#__PURE__*/React.createElement("input", {
-        ref: input,
+      }, /*#__PURE__*/React.createElement("input", {
         type: "text",
         name: "task",
-        value: task.content,
-        onChange: handleUpdateText
+        defaultValue: task.content
+      }), /*#__PURE__*/React.createElement("label", {
+        htmlFor: "taskDone"
+      }, "Completed?"), /*#__PURE__*/React.createElement("input", {
+        type: "checkbox",
+        name: "taskDone",
+        defaultChecked: task.completed
       }));
     })), /*#__PURE__*/React.createElement("button", {
       type: "button",

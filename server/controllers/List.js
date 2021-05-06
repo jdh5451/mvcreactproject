@@ -119,6 +119,7 @@ const editList = (req, res) => {
       tasks.push(new Task.TaskModel({
             title: req.body.tasks[i].title,
             content: req.body.tasks[i].content,
+            completed: req.body.tasks[i].completed,
         }));
     }
     
