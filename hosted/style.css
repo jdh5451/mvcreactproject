@@ -125,7 +125,7 @@ form{
     margin: 0 auto;
     margin-top: 14px;
     font-size: 1.2em;
-    width: 100px;
+    width: fit-content;
     background-color: #f5f2d0;
     border-radius: 2px;
     border-color: black;
