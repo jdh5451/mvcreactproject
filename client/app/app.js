@@ -1,10 +1,17 @@
 let csrfToken;
-let taskLimit=5;
+let isPremium;
 
 const handleList=(e)=>{
     e.preventDefault();
     //console.log(document.getElementById("taskList").childNodes);
     //console.log($("#createForm").serialize());
+    $("#errorMessage").animate({width:'hide'}, 350);
+    
+    if(!document.getElementById("titleField").value||document.getElementById("titleField").value===""){
+        handleError("Checklist must have a title.");
+        return false;
+    }
+    
     const listObject={
         title:document.getElementById("titleField").value,
         desc:document.getElementById("descField").value,
@@ -15,12 +22,15 @@ const handleList=(e)=>{
     let tasks=document.getElementById("taskList").childNodes;
     
     if(tasks.length===0){
-        //error out
+        handleError("Cannot send list without tasks!");
         return false;
     }
     
     for(let i=0;i<tasks.length;i++){
-        
+        if(!tasks[i].firstElementChild.value||tasks[i].firstElementChild.value===""){
+            handleError("All tasks must be given descriptions!");
+            return false;
+        }
         listObject.tasks[i]={
           title:listObject.title,
           content: tasks[i].firstElementChild.value,
@@ -83,7 +93,7 @@ const ListView=(props)=>{
             <div key={list._id} className="checklist">
                 <div className="header">
                     <h3 className="listTitle">{list.title}</h3>
-                    <button title={list.title} onClick={handleClick}>+</button>
+                    <button className="formSubmit" title={list.title} onClick={handleClick}>+</button>
                 </div>
                 <div className="listContent" id={list.title} style={{display:'none'}}>
                     <h3 className="listDesc">{list.desc}</h3>
@@ -125,7 +135,7 @@ const ListView=(props)=>{
     });
     return(
         <div id="displayList">
-        <button type="button" onClick={handleToggleEdit}>Edit</button>
+        <button className="formSubmit" type="button" onClick={handleToggleEdit}>Edit</button>
         {listNodes}  
         </div>
     );
@@ -148,6 +158,13 @@ const EditView=(props)=>{
             e.preventDefault();
             //console.log(document.getElementById("taskList").childNodes);
             //console.log($("#createForm").serialize());
+             
+            $("#errorMessage").animate({width:'hide'}, 350);
+            if(!document.getElementById(`${list.title}TitleField`).value||document.getElementById(`${list.title}TitleField`).value===""){
+                handleError("Checklist must have a title.");
+                return false;
+            }
+            
             const listObject={
                 id:list._id,
                 title:document.getElementById(`${list.title}TitleField`).value,
@@ -159,12 +176,15 @@ const EditView=(props)=>{
             let tasks=document.getElementById(`edit${list.title}List`).childNodes;
     
             if(tasks.length===0){
-                //error out
+                handleError("Cannot send list without tasks!");
                 return false;
             }
     
             for(let i=0;i<tasks.length;i++){
-                console.log(tasks[i].firstElementChild.value);
+                if(!tasks[i].firstElementChild.value||tasks[i].firstElementChild.value===""){
+                    handleError("All tasks must be given descriptions!");
+                    return false;
+                }
                 listObject.tasks[i]={
                 title:listObject.title,
                 content: tasks[i].firstElementChild.value,
@@ -180,12 +200,17 @@ const EditView=(props)=>{
             return false;
         };
         
-        
+        /*const handleDelete=(e)=>{
+            e.preventDefault();
+            let data=`_csrf=${csrfToken}&title=${list.title}`;
+            
+            
+        }*/
         
         return(
             <div key={list._id} className="editForm">
-                <h3>Edit List</h3>
-                <button title={`edit${list.title}`} onClick={handleClick}>+</button>
+                <h3>Edit List: {list.title}</h3>
+                <button className="formSubmit" title={`edit${list.title}`} onClick={handleClick}>+</button>
                 
                 <div id={`edit${list.title}`} style={{display:'none'}}>
                     <form
@@ -227,8 +252,8 @@ const EditView=(props)=>{
                             </li>);
                         })}
                     </ul>
-                    <button type="button" onClick={handleToggleEdit}>Cancel</button>
-                    <input className="submitEdit" type="submit" value="Edit Checklist" />
+                    
+                    <input className="formSubmit" type="submit" value="Edit Checklist" />
                     </form>
                 </div>
             </div>
@@ -236,7 +261,7 @@ const EditView=(props)=>{
     });
     return(
         <div id="displayEdit">
-       
+        <button className="formSubmit" type="button" onClick={handleToggleEdit}>Cancel</button>
         {editNodes}  
         </div>
     );
@@ -258,15 +283,16 @@ const MakeForm=(props)=>{
     };*/
     
     const handleAdd=(e)=>{
+        $("#errorMessage").animate({width:'hide'}, 350);
         console.log("handling add");
+        let taskLimit=4;
+        if(isPremium)taskLimit=6;
         let tasks=Array.from(document.getElementById("taskList").childNodes);
         console.log(tasks);
-        if(tasks.length>2) {
-            console.log('cannot add more tasks');
+        if(tasks.length>taskLimit) {
+            handleError("This list cannot hold any more tasks!");
+            return false;
         } else {
-            if(tasks.length+1>2){
-                document.querySelector("#addButton").style.display='none';
-            }
             let taskInputs = tasks.map((task) => {
                 return (
                     <li>
@@ -289,7 +315,7 @@ const MakeForm=(props)=>{
     return(
         <div className="makeForm">
                 <h3 className="makePrompt">Create List</h3>
-               <button title={"create"} onClick={handleClick}>+</button>
+               <button className="formSubmit" title={"create"} onClick={handleClick}>+</button>
             
         
             <div id={"create"} style={{display:'none'}}>
@@ -306,7 +332,7 @@ const MakeForm=(props)=>{
             <input id="titleField" type="text" name="title" placeholder="New Checklist"/>
             <label htmlFor="desc">Description: </label>
             <input id="descField" type="text" name="desc" placeholder="No description."/>
-            <button id="addButton" type="button" onClick={handleAdd}>Add Task</button>
+            <button className="formSubmit" id="addButton" type="button" onClick={handleAdd}>Add Task</button>
             <ul id="taskList">
                 <li>
                     <input type="text" placeholder="Write your task here..."/>
@@ -316,13 +342,52 @@ const MakeForm=(props)=>{
             </ul>
             
             <input type="hidden" name="_csrf" value={props.csrf} />
-            <input className="submitList" type="submit" value="Create Checklist"/>
+            <input className="formSubmit" type="submit" value="Create Checklist"/>
         </form>
             </div>
         </div>
         
     );
 };
+
+const PremiumButton=()=>{
+    const handlePremium=(e)=>{
+        e.preventDefault();
+        
+        $("#errorMessage").animate({width:'hide'}, 350);
+        
+        if(isPremium){
+            handleError("You're already premium!");
+            return false;
+        }
+        let data=`_csrf=${csrfToken}`;
+        sendAjax('POST', '/goPremium',data,function(){
+            getPremium();
+        });
+    };
+    
+    if(isPremium){
+        return(
+            <button
+                className="formSubmit"
+                style={{display:'none'}}
+                onClick={handlePremium}
+                >
+                Premium!
+            </button>
+        );
+    }
+    else{
+        return(
+            <button
+                className="formSubmit"
+                onClick={handlePremium}
+                >
+                Go Premium!
+            </button>
+        );
+    }
+}
 
 const loadTitlesFromServer=()=>{
     sendAjax('GET', '/getTitles', null, (data)=>{
@@ -348,6 +413,7 @@ const setup=function(){
         <MakeForm csrf={csrfToken} />, document.querySelector("#make")
     );
     loadTitlesFromServer();
+    getPremium();
 };
 
 const getToken=()=>{
@@ -355,8 +421,16 @@ const getToken=()=>{
       csrfToken=result.csrfToken;
       setup();
   }); 
+};
 
-    
+const getPremium=()=>{
+    sendAjax('GET', '/isPremium', null, (result)=>{
+        isPremium=result.premium;
+        console.log(isPremium);
+        ReactDOM.render(
+            <PremiumButton />,document.querySelector("#premium")
+        );
+    });
 };
 
 $(document).ready(function(){

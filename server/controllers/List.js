@@ -20,9 +20,9 @@ const makeList = (req, res) => {
     return res.status(400).json({ error: 'Title is required.' });
   }
 
-  /* if(req.body.numberTasks<1){
-        return res.status(400).json({error:'Cannot make an empty checklist!'});
-    } */
+  if (req.body.tasks.length < 1) {
+    return res.status(400).json({ error: 'Cannot make an empty checklist!' });
+  }
 
   const listData = {
     title: req.body.title,
@@ -104,6 +104,10 @@ const updateList = (req, res) => {
 const editList = (req, res) => {
   if (!req.body.id) {
     return res.status(400).json({ error: 'An error occured.' });
+  }
+
+  if (req.body.tasks.length < 1) {
+    return res.status(400).json({ error: 'Cannot make an empty checklist!' });
   }
 
   List.ListModel.findById(req.session.account._id, req.body.id, (err, doc) => {

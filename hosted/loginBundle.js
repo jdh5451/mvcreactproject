@@ -2,6 +2,9 @@
 
 var handleLogin = function handleLogin(e) {
   e.preventDefault();
+  $("#errorMessage").animate({
+    width: 'hide'
+  }, 350);
 
   if ($("#user").val() == '' || $("#pass").val() == '') {
     handleError("Username or password is empty!");
@@ -15,6 +18,9 @@ var handleLogin = function handleLogin(e) {
 
 var handleSignup = function handleSignup(e) {
   e.preventDefault();
+  $("#errorMessage").animate({
+    width: 'hide'
+  }, 350);
 
   if ($("#user").val() == '' || $("#pass").val() == '' || $("#pass2").val() == '') {
     handleError("All fields are required!");
@@ -38,7 +44,7 @@ var LoginWindow = function LoginWindow(props) {
     action: "/login",
     method: "POST",
     className: "mainForm"
-  }, /*#__PURE__*/React.createElement("label", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Log in!"), /*#__PURE__*/React.createElement("label", {
     htmlFor: "username"
   }, "Username: "), /*#__PURE__*/React.createElement("input", {
     id: "user",
@@ -71,7 +77,7 @@ var SignupWindow = function SignupWindow(props) {
     action: "/signup",
     method: "POST",
     className: "mainForm"
-  }, /*#__PURE__*/React.createElement("label", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Sign up!"), /*#__PURE__*/React.createElement("label", {
     htmlFor: "username"
   }, "Username: "), /*#__PURE__*/React.createElement("input", {
     id: "user",
@@ -143,10 +149,16 @@ $(document).ready(function () {
 "use strict";
 
 var handleError = function handleError(message) {
-  console.log(message);
+  $("#errorMessage").text(message);
+  $("#errorMessage").animate({
+    width: 'toggle'
+  }, 350);
 };
 
 var redirect = function redirect(response) {
+  $("#errorMessage").animate({
+    width: 'hide'
+  }, 350);
   window.location = response.redirect;
 };
 

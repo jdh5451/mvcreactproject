@@ -1,7 +1,7 @@
 const handleLogin=(e)=>{
     e.preventDefault();
     
-    
+    $("#errorMessage").animate({width:'hide'}, 350);
     if($("#user").val()==''||$("#pass").val()==''){
         handleError("Username or password is empty!");
         return false;
@@ -17,7 +17,7 @@ const handleLogin=(e)=>{
 const handleSignup=(e)=>{
     e.preventDefault();
     
-    
+    $("#errorMessage").animate({width:'hide'}, 350);
     
     if($("#user").val()==''||$("#pass").val()==''||$("#pass2").val()==''){
         handleError("All fields are required!");
@@ -42,7 +42,7 @@ const LoginWindow=(props)=>{
             method="POST"
             className="mainForm"
             >
-            
+            <h3>Log in!</h3>
             <label htmlFor="username">Username: </label>
             <input id="user" type="text" name="username" placeholder="username"/>
             <label htmlFor="pass">Password: </label>
@@ -62,7 +62,7 @@ const SignupWindow=(props)=>{
             method="POST"
             className="mainForm"
             >
-            
+            <h3>Sign up!</h3>
             <label htmlFor="username">Username: </label>
             <input id="user" type="text" name="username" placeholder="username"/>
             <label htmlFor="pass">Password: </label>

@@ -1,11 +1,20 @@
 "use strict";
 
 var csrfToken;
-var taskLimit = 5;
+var isPremium;
 
 var handleList = function handleList(e) {
   e.preventDefault(); //console.log(document.getElementById("taskList").childNodes);
   //console.log($("#createForm").serialize());
+
+  $("#errorMessage").animate({
+    width: 'hide'
+  }, 350);
+
+  if (!document.getElementById("titleField").value || document.getElementById("titleField").value === "") {
+    handleError("Checklist must have a title.");
+    return false;
+  }
 
   var listObject = {
     title: document.getElementById("titleField").value,
@@ -16,11 +25,16 @@ var handleList = function handleList(e) {
   var tasks = document.getElementById("taskList").childNodes;
 
   if (tasks.length === 0) {
-    //error out
+    handleError("Cannot send list without tasks!");
     return false;
   }
 
   for (var i = 0; i < tasks.length; i++) {
+    if (!tasks[i].firstElementChild.value || tasks[i].firstElementChild.value === "") {
+      handleError("All tasks must be given descriptions!");
+      return false;
+    }
+
     listObject.tasks[i] = {
       title: listObject.title,
       content: tasks[i].firstElementChild.value
@@ -82,6 +96,7 @@ var ListView = function ListView(props) {
     }, /*#__PURE__*/React.createElement("h3", {
       className: "listTitle"
     }, list.title), /*#__PURE__*/React.createElement("button", {
+      className: "formSubmit",
       title: list.title,
       onClick: handleClick
     }, "+")), /*#__PURE__*/React.createElement("div", {
@@ -120,6 +135,7 @@ var ListView = function ListView(props) {
   return /*#__PURE__*/React.createElement("div", {
     id: "displayList"
   }, /*#__PURE__*/React.createElement("button", {
+    className: "formSubmit",
     type: "button",
     onClick: handleToggleEdit
   }, "Edit"), listNodes);
@@ -141,6 +157,15 @@ var EditView = function EditView(props) {
       e.preventDefault(); //console.log(document.getElementById("taskList").childNodes);
       //console.log($("#createForm").serialize());
 
+      $("#errorMessage").animate({
+        width: 'hide'
+      }, 350);
+
+      if (!document.getElementById("".concat(list.title, "TitleField")).value || document.getElementById("".concat(list.title, "TitleField")).value === "") {
+        handleError("Checklist must have a title.");
+        return false;
+      }
+
       var listObject = {
         id: list._id,
         title: document.getElementById("".concat(list.title, "TitleField")).value,
@@ -151,12 +176,16 @@ var EditView = function EditView(props) {
       var tasks = document.getElementById("edit".concat(list.title, "List")).childNodes;
 
       if (tasks.length === 0) {
-        //error out
+        handleError("Cannot send list without tasks!");
         return false;
       }
 
       for (var i = 0; i < tasks.length; i++) {
-        console.log(tasks[i].firstElementChild.value);
+        if (!tasks[i].firstElementChild.value || tasks[i].firstElementChild.value === "") {
+          handleError("All tasks must be given descriptions!");
+          return false;
+        }
+
         listObject.tasks[i] = {
           title: listObject.title,
           content: tasks[i].firstElementChild.value,
@@ -170,11 +199,19 @@ var EditView = function EditView(props) {
       });
       return false;
     };
+    /*const handleDelete=(e)=>{
+        e.preventDefault();
+        let data=`_csrf=${csrfToken}&title=${list.title}`;
+        
+        
+    }*/
+
 
     return /*#__PURE__*/React.createElement("div", {
       key: list._id,
       className: "editForm"
-    }, /*#__PURE__*/React.createElement("h3", null, "Edit List"), /*#__PURE__*/React.createElement("button", {
+    }, /*#__PURE__*/React.createElement("h3", null, "Edit List: ", list.title), /*#__PURE__*/React.createElement("button", {
+      className: "formSubmit",
       title: "edit".concat(list.title),
       onClick: handleClick
     }, "+"), /*#__PURE__*/React.createElement("div", {
@@ -222,18 +259,19 @@ var EditView = function EditView(props) {
         name: "taskDone",
         defaultChecked: task.completed
       }));
-    })), /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      onClick: handleToggleEdit
-    }, "Cancel"), /*#__PURE__*/React.createElement("input", {
-      className: "submitEdit",
+    })), /*#__PURE__*/React.createElement("input", {
+      className: "formSubmit",
       type: "submit",
       value: "Edit Checklist"
     }))));
   });
   return /*#__PURE__*/React.createElement("div", {
     id: "displayEdit"
-  }, editNodes);
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "formSubmit",
+    type: "button",
+    onClick: handleToggleEdit
+  }, "Cancel"), editNodes);
 };
 
 var MakeForm = function MakeForm(props) {
@@ -250,17 +288,19 @@ var MakeForm = function MakeForm(props) {
       e.target.parentNode.remove();
   };*/
   var handleAdd = function handleAdd(e) {
+    $("#errorMessage").animate({
+      width: 'hide'
+    }, 350);
     console.log("handling add");
+    var taskLimit = 4;
+    if (isPremium) taskLimit = 6;
     var tasks = Array.from(document.getElementById("taskList").childNodes);
     console.log(tasks);
 
-    if (tasks.length > 2) {
-      console.log('cannot add more tasks');
+    if (tasks.length > taskLimit) {
+      handleError("This list cannot hold any more tasks!");
+      return false;
     } else {
-      if (tasks.length + 1 > 2) {
-        document.querySelector("#addButton").style.display = 'none';
-      }
-
       var taskInputs = tasks.map(function (task) {
         return /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("input", {
           type: "text",
@@ -281,6 +321,7 @@ var MakeForm = function MakeForm(props) {
   }, /*#__PURE__*/React.createElement("h3", {
     className: "makePrompt"
   }, "Create List"), /*#__PURE__*/React.createElement("button", {
+    className: "formSubmit",
     title: "create",
     onClick: handleClick
   }, "+"), /*#__PURE__*/React.createElement("div", {
@@ -309,6 +350,7 @@ var MakeForm = function MakeForm(props) {
     name: "desc",
     placeholder: "No description."
   }), /*#__PURE__*/React.createElement("button", {
+    className: "formSubmit",
     id: "addButton",
     type: "button",
     onClick: handleAdd
@@ -322,10 +364,44 @@ var MakeForm = function MakeForm(props) {
     name: "_csrf",
     value: props.csrf
   }), /*#__PURE__*/React.createElement("input", {
-    className: "submitList",
+    className: "formSubmit",
     type: "submit",
     value: "Create Checklist"
   }))));
+};
+
+var PremiumButton = function PremiumButton() {
+  var handlePremium = function handlePremium(e) {
+    e.preventDefault();
+    $("#errorMessage").animate({
+      width: 'hide'
+    }, 350);
+
+    if (isPremium) {
+      handleError("You're already premium!");
+      return false;
+    }
+
+    var data = "_csrf=".concat(csrfToken);
+    sendAjax('POST', '/goPremium', data, function () {
+      getPremium();
+    });
+  };
+
+  if (isPremium) {
+    return /*#__PURE__*/React.createElement("button", {
+      className: "formSubmit",
+      style: {
+        display: 'none'
+      },
+      onClick: handlePremium
+    }, "Premium!");
+  } else {
+    return /*#__PURE__*/React.createElement("button", {
+      className: "formSubmit",
+      onClick: handlePremium
+    }, "Go Premium!");
+  }
 };
 
 var loadTitlesFromServer = function loadTitlesFromServer() {
@@ -353,6 +429,7 @@ var setup = function setup() {
     csrf: csrfToken
   }), document.querySelector("#make"));
   loadTitlesFromServer();
+  getPremium();
 };
 
 var getToken = function getToken() {
@@ -362,16 +439,30 @@ var getToken = function getToken() {
   });
 };
 
+var getPremium = function getPremium() {
+  sendAjax('GET', '/isPremium', null, function (result) {
+    isPremium = result.premium;
+    console.log(isPremium);
+    ReactDOM.render( /*#__PURE__*/React.createElement(PremiumButton, null), document.querySelector("#premium"));
+  });
+};
+
 $(document).ready(function () {
   getToken();
 });
 "use strict";
 
 var handleError = function handleError(message) {
-  console.log(message);
+  $("#errorMessage").text(message);
+  $("#errorMessage").animate({
+    width: 'toggle'
+  }, 350);
 };
 
 var redirect = function redirect(response) {
+  $("#errorMessage").animate({
+    width: 'hide'
+  }, 350);
   window.location = response.redirect;
 };
 

@@ -78,9 +78,7 @@ const signup = (request, response) => {
   });
 };
 
-const getToken = (request, response) => {
-  const req = request;
-  const res = response;
+const getToken = (req, res) => {
   const csrfJSON = {
     csrfToken: req.csrfToken(),
   };
@@ -88,8 +86,45 @@ const getToken = (request, response) => {
   res.json(csrfJSON);
 };
 
+const getPremium = (req, res) => {
+  Account.AccountModel.findByUsername(req.session.account.username, (err, docs) => {
+    if (err) {
+      console.log(err);
+      return res.status(400).json({ error: 'An error occured.' });
+    }
+
+    return res.json({ premium: docs.premium });
+  });
+  return false;
+};
+
+const goPremium = (req, res) => {
+  Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
+    if (err) { return res.status(500).json({ err }); }
+    if (!doc) { return res.json({ warning: 'Account not found.' }); }
+
+    const tempAccount = doc;
+
+    if (!tempAccount.premium) tempAccount.premium = true;
+
+    const accountPromise = tempAccount.save();
+
+    accountPromise.then(() => res.json({ redirect: '/app' }));
+
+    accountPromise.catch((e) => {
+      console.log(e);
+      return res.status(400).json({ error: 'An error occured.' });
+    });
+
+    return accountPromise;
+  });
+  return false;
+};
+
 module.exports.loginPage = loginPage;
 module.exports.login = login;
 module.exports.logout = logout;
 module.exports.signup = signup;
 module.exports.getToken = getToken;
+module.exports.getPremium = getPremium;
+module.exports.goPremium = goPremium;

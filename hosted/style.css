@@ -4,6 +4,8 @@ html, body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    background-image: radial-gradient(#95d7e5,#59ffbb);
+    font-family: 'Helvetica', sans-serif;
 }
 
 #logo {
@@ -17,11 +19,20 @@ html, body {
 nav {
     width: 100%;
     height: 50px;
-    background-color: #55acee;
+    background-color: #80604d;
+    border: 2px solid black;
 }
 
 nav:nth-child(1) {
     padding-left: 25px;
+}
+
+.pagetitle{
+    float: right;
+    margin-right:10px;
+    color: white;
+    
+   
 }
 
 .navlink {
@@ -34,26 +45,64 @@ nav:nth-child(1) {
 }
 
 .navlink a, .navlink a:link, .navlink a:visited, .navlink a:hover, .navlink a:active {
-    color: white;
+    color: black;
     text-decoration: none;
     padding: 5px;
     border-radius: 4px;
-    background-color: #55acee;
+    border-color: black;
+    background-color: #f5f2d0;
     transition: background-color 0.4s ease;
 }
 
 .navlink a:hover {
     transition: background-color 0.8s ease;
-    background-color: #66bdff;
+    background-color: #e5dd85;
+}
+
+#app{
+    margin: 10 auto;
+    width: 80%;
+    height:80%;
+    border: 2px solid black;
+    padding: 10px;
+    text-align: center;
+    background-color: #fffcc0;
+    font-family: 'Helvetica', sans-serif;
+    overflow: auto;
 }
 
 
 
+#displayList{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: auto;
+    width:60%;
+}
+
+form{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: auto;
+    width:60%;
+}
+
+#premium{
+    float:right;
+}
 .mainForm {
     height: 300px;
-    width: 350px;
-    margin: 0 auto;
-    padding-top: 350px;
+    border: 2px solid black;
+    
+    background-color: #fffcc0;
+    margin: 10 auto;
+   
     font-size: 1.2em;
 }
 
@@ -64,7 +113,7 @@ nav:nth-child(1) {
 .mainForm label {
     display: inline-block;
     width: 100px;
-    margin-right: 10px;
+    
     text-align: right;
     font-size: 1.2em;
 }
@@ -77,21 +126,28 @@ nav:nth-child(1) {
     margin-top: 14px;
     font-size: 1.2em;
     width: 100px;
-    background-color: #55acee;
+    background-color: #f5f2d0;
     border-radius: 2px;
-    border-color: #66acee;
+    border-color: black;
     padding: 3px 0px;
-    color: white;
+    color: black;
     text-decoration: none;
 }
 
+#errorMessage {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: red;
+    font-style: italic;
+}
+
 .formSubmit:link, .formSubmit:visited, .formSubmit:hover, .formSubmit:active {
-    color: white;
+    color: black;
 }
 
 .formSubmit:hover {
     transition: background-color 0.4s ease;
-    background-color: #338acc;
+    background-color: #e5dd85;
 }
 
 #user, #pass, #pass2 {
