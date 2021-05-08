@@ -105,7 +105,7 @@ var SignupWindow = function SignupWindow(props) {
   }), /*#__PURE__*/React.createElement("input", {
     className: "formSubmit",
     type: "submit",
-    value: "Sign in"
+    value: "Sign up"
   }));
 };
 

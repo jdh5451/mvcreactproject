@@ -390,12 +390,8 @@ var PremiumButton = function PremiumButton() {
 
   if (isPremium) {
     return /*#__PURE__*/React.createElement("button", {
-      className: "formSubmit",
-      style: {
-        display: 'none'
-      },
-      onClick: handlePremium
-    }, "Premium!");
+      className: "formSubmit"
+    }, "You're Premium!");
   } else {
     return /*#__PURE__*/React.createElement("button", {
       className: "formSubmit",

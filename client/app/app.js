@@ -370,10 +370,9 @@ const PremiumButton=()=>{
         return(
             <button
                 className="formSubmit"
-                style={{display:'none'}}
-                onClick={handlePremium}
+                
                 >
-                Premium!
+                You're Premium!
             </button>
         );
     }
